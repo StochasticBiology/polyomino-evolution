@@ -28,5 +28,3 @@ gcc -o3 sim-poly-blend.c -lm -o sim-poly-blend.ce -g
 ./sim-poly-blend.ce --numr 0 --ntile 2 --ncol 8 --nbitcol 3 > tmp24 &
 ./sim-poly-blend.ce --numr 0 --ntile 4 --ncol 16 --nbitcol 4 > tmp25 &
 ./sim-poly-blend.ce --numr 0 --ntile 8 --ncol 32 --nbitcol 5 > tmp26 &
-
-# Fig S7 caption should be S_nb, 4n_b not S_nb, 2n_b
