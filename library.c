@@ -56,29 +56,29 @@ int SymmLibrary(int *g, int size, int *lib, int *sizelib, int *numlib, int ARR, 
       fail = 0;
 
       // loop through all extant structures looking for a match
-  for(n = 0; n < *numlib; n++)
-    {
-      // first check for a size match: skip if we're the wrong size
-      if(size == sizelib[n])
+      for(n = 0; n < *numlib; n++)
 	{
-	  fail = 0;
-	  // compare structures pixel-by-pixel
-	  for(i = 0; i < ARR && fail == 0; i++)
+	  // first check for a size match: skip if we're the wrong size
+	  if(size == sizelib[n])
 	    {
-	      for(j = 0; j < ARR && fail == 0; j++)
+	      fail = 0;
+	      // compare structures pixel-by-pixel
+	      for(i = 0; i < ARR && fail == 0; i++)
 		{
-		  x = i+mini; y = j+minj;
-		  if(x < ARR && y < ARR)
+		  for(j = 0; j < ARR && fail == 0; j++)
 		    {
-		      if((T[y*ARR+x] == -1 && lib[n*ARR*ARR+j*ARR+i] != -1) || (T[y*ARR+x] != -1 && lib[n*ARR*ARR+j*ARR+i] == -1))
-			fail = 1;
+		      x = i+mini; y = j+minj;
+		      if(x < ARR && y < ARR)
+			{
+			  if((T[y*ARR+x] == -1 && lib[n*ARR*ARR+j*ARR+i] != -1) || (T[y*ARR+x] != -1 && lib[n*ARR*ARR+j*ARR+i] == -1))
+			    fail = 1;
+			}
 		    }
 		}
+	      // if we've found a match, just return the reference
+	      if(fail == 0) return n;
 	    }
-	  // if we've found a match, just return the reference
-	  if(fail == 0) return n;
 	}
-    }
 
     }
 
@@ -86,19 +86,19 @@ int SymmLibrary(int *g, int size, int *lib, int *sizelib, int *numlib, int ARR, 
   *newpheno = 1;
 
   mini = minj = ARR;
-      for(i = 0; i < ARR; i++)
+  for(i = 0; i < ARR; i++)
+    {
+      for(j = 0; j < ARR; j++)
 	{
-	  for(j = 0; j < ARR; j++)
+	  if(g[j*ARR+i] >= 0)
 	    {
-	      if(g[j*ARR+i] >= 0)
-		{
-		  if(i < mini) mini = i;
-		  if(j < minj) minj = j;
-		}
+	      if(i < mini) mini = i;
+	      if(j < minj) minj = j;
 	    }
 	}
+    }
 
-      // add it to the next open slot in the library
+  // add it to the next open slot in the library
   for(i = 0; i < ARR; i++)
     {
       for(j = 0; j < ARR; j++)
@@ -115,7 +115,5 @@ int SymmLibrary(int *g, int size, int *lib, int *sizelib, int *numlib, int ARR, 
   (*numlib)++;
 
   return (*numlib)-1;
-
-
 }
 

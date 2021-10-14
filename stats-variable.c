@@ -13,10 +13,7 @@ int Modularity(int *g, int ARR, int MAXBLOCKS);
 int LZComplexity(char *p_binarySequence, int p_maxTreeNodes);
 void Canonical(int *g, int *t, int ARR);
 int SymmCount(int *grid, int ARR);
-int CompareGene(int *g1, int *g2);
-double NecklaceComplexity(int *t, int l, int GENES);
 void GenomeComplexityMultiStats(int *gtemp, int n, int nuc, ComplexityMeasures *CM, int LEN, int nbitcol, FILE *fp);
-double GenomeReducer(int *r, int l, int *s, int tracker, int GENES, int ARR);
 double nfunction(int n, int c);
 
 // get the number of distinct blocks that appear in a polyomino structure
@@ -43,6 +40,8 @@ int Modularity(int *g, int ARR, int MAXBLOCKS)
   return nappear;
 }
 
+// code to compute LZ complexity
+// this is from Taliadon's solution here https://stackoverflow.com/questions/4946695/calculating-lempel-ziv-lz-complexity-aka-sequence-complexity-of-a-binary-str
 int LZComplexity(char *p_binarySequence, int p_maxTreeNodes)
 {
   void **patternTree;
@@ -196,99 +195,6 @@ int SymmCount(int *grid, int ARR)
   return symm;
 }
 
-/******** the CompareGene/Complexity/GenomeReducer system is probably deprecated *******/
-// most stuff uses the GenomeComplexity function 
-int CompareGene(int *g1, int *g2)
-{
-  int off, i;
-  int fail;
-
-  for(off = 0; off < 4; off++)
-    {
-      fail = 0;
-      for(i = 0; i < 4; i++)
-	{
-	  if(g1[i] != g2[(i+off)%4]) { fail = 1; break; }
-	}
-      if(fail == 0) return 0;
-    }
-  return 1;
-}
-
-double NecklaceComplexity(int *t, int l, int GENES)
-{
-  int used[GENES/4];
-  int i, j;
-  int numused;
-  double complexity = 0;
-  int cols[100];
-  int highest;
-  double ci, nprime;
-  int found;
-
-  numused = 0;
-
-  for(i = 0; i < GENES/4; i++)
-    used[i] = 0;
-
-  for(i = 0; i < GENES/4; i++)
-    {
-      found = 0;
-      for(j = 0; j < numused; j++)
-	{
-	  if(CompareGene(&(t[4*i]), &(t[4*used[j]])) == 0)
-	    {
-	      found = 1;
-	      break;
-	    }
-	}
-      if(found == 0)
-	{
-	  for(j = 0; j < 4; j++)
-	    used[numused] = i;
-	  numused++;
-	}
-    }
-
-  highest = 0;
-
-  for(i = 0; i < numused; i++)
-    {
-      for(j = 0; j < 4; j++)
-	{
-	  if(t[4*used[i]+j] > highest) highest = t[4*used[i]+j];
-	}
-    }
-
-  highest++;
-  for(i = 0; i < numused; i++)
-    {
-      if(used[i] == 4 && (l == 3 || l == 4))
-	printf(".");
-      ci = 0;
-      for(j = 0; j < highest; j++)
-	cols[j] = 0;
-      for(j = 0; j < 4; j++)      
-        cols[t[4*used[i]+j]]++;
-      for(j = 0; j < highest; j++)
-	ci += (cols[j] != 0);
-
-      switch((int)ci)
-	{
-	case 1: nprime = 1; break;
-	case 2: nprime = 4; break;
-	case 3: nprime = 9; break;
-	case 4: nprime = 6; break;
-	}
-      if(!(cols[0] > 0 && ci == 1))
-        complexity += ci*log2(highest)+log2(nprime);
-    }
-
-  return complexity;
-}
-
-/***************/
-
 // GenomeComplexity
 // takes: g - list of sides (genome); n - number of blocks in genome; nuc - block that acts as nucleus
 // returns effective complexity of genome
@@ -433,122 +339,9 @@ void GenomeComplexityMultiStats(int *gtemp, int n, int nuc, ComplexityMeasures *
   CM->necklace = necklace;
   CM->lzc = lzc;
   
-  //totalnum;//*log2(nc);
-
-  /******** the above bit is fluid -- but these days we're most interested in just the number of colours in the genome. this is nc*2 -- at the moment we're post-processing this by e.g. plotting 2*(iaincomp2) *********/
 }
 
 
-/**** this function belongs to the CompareGene/Complexity/GenomeReducer system ***/
-// reduces a genome to minimal effective interactions
-// we now favour optimisation bare genomes across a sampled set of structures
-double GenomeReducer(int *r, int l, int *s, int tracker, int GENES, int ARR)
-{
-  int t[GENES];
-  int involved[GENES/4];
-  int i, j;
-  int label, pfound, bond, partner;
-  int done[100];
-  FILE *fp;
-  int size;
-  int grid[ARR*ARR];
-
-  if(tracker == 0)
-    {
-      fp = fopen("interest.gen", "a");
-      fprintf(fp, "%i\n", l);
-    }
-
-  for(i = 0; i < 100; i++)
-    done[i] = 0;
-
-  for(i = 0; i < GENES/4; i++)
-    involved[i] = 0;
-
-  for(i = 0; i < GENES; i++)
-    {
-      s[i] = 0;
-      for(j = 0; j < 4; j++)
-	{
-	  s[i] += r[4*i+j]*pow(2, 3-j);
-	}
-    }
-
-  if(Grow(s, GENES/4, grid, &size, 0, 0, 10, 0, ARR) == 0)
-    {
-      for(i = 0; i < ARR*ARR; i++)
-	{
-	  if(grid[i] >= 0)
-	    involved[grid[i]] = 1;
-	}
-    }
-  else
-    {
-      for(i = 0; i < GENES/4; i++)
-	involved[i] = 1;
-    }
-
-
-  for(i = 0; i < GENES; i++)
-    {
-      //     fprintf(fp, "%i, ", s[i]);
-      t[i] = s[i];
-      //      if((i+1) % 4 == 0) fprintf(fp, "| ");
-    }
-  //fprintf(fp, "\n");
-
-  label = 1;
-  for(i = 0; i < GENES; i++)
-    {
-      if(!involved[i/4]) t[i] = 0;
-      else if(s[i] && done[s[i]] == 0)
-	{
-	  pfound = 0;
-	  bond = s[i]; partner = (bond % 2 ? bond+1 : bond-1);
-	  for(j = 0; j < GENES; j++)
-	    {
-	      if(s[j] == bond) t[j] = label;
-	      if(s[j] == partner) { t[j] = label+1; pfound = 1; }
-	    }
-          done[bond] = 1; done[partner] = 1;
-	  if(pfound == 0)
-	    {
-	      for(j = 0; j < GENES; j++)
-		{
-		  if(s[j] == bond) t[j] = 0;
-		}
-	    }
-	  else {  label += 2; }
-	}
-    }
-  if(tracker == 0)
-    {
-      for(i = 0; i < GENES; i++)
-	{
-	  fprintf(fp, "%i, ", t[i]);
-	  //  if((i+1) % 4 == 0) fprintf(fp, "| ");
-	}
-      fclose(fp);
-    }
-  if(tracker == 1)
-    {
-      for(i = 0; i < GENES; i++)
-	s[i] = t[i];
-    }
-  /*  else
-      {
-      fp = fopen("tracker.dat", "a");
-      for(i = 0; i < GENES; i++)
-      {
-      fprintf(fp, "%i, ", t[i]);
-      //  if((i+1) % 4 == 0) fprintf(fp, "| ");
-      }
-      fprintf(fp, "\n%.5f\n", Complexity(t));
-      fclose(fp);
-      }*/
-
-  return NecklaceComplexity(t, l, GENES);
-}
 
 double nfunction(int n, int c)
 {

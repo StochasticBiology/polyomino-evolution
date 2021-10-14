@@ -1,3 +1,5 @@
+void BreedGen(int *P, float *f, int NPAR, int LEN, float mu);
+
 // core GA routine: takes a population P and vector of fitness values f, performs selection and mutation (rate mu)
 void BreedGen(int *P, float *f, int NPAR, int LEN, float mu)
 {
@@ -8,6 +10,7 @@ void BreedGen(int *P, float *f, int NPAR, int LEN, float mu)
   int selected;
   float *cumsum;
 
+  // allocate memory for cumulative sum of fitnesses
   cumsum = (float*)malloc(sizeof(float)*NPAR);
   // tp will store our temporary new population then get copied at the end
   tp = (int*)malloc(sizeof(int)*NPAR*LEN);

@@ -1,10 +1,8 @@
-// assembly.h
+// assembly.c
 // library for polyominos
-// includes 2D, 3D, 2D with block populations
 
 void OutputGrid(int *G, int ARR);
 void FileOutputGrid(FILE *fp, int *G, int ARR);
-void OutputGridGraphics(int *G, int ARR);
 void Push(int *data, int *neighbourlist, int *length);
 void Pop(int *neighbourlist, int *length, int index);
 int Add(int x, int y, int type, int ori, int *Grid, int *sides, int n, int *sidelist, int *neighbourlist, int *length, int allownd, int allowub, int ARR);
@@ -37,25 +35,6 @@ void FileOutputGrid(FILE *fp, int *G, int ARR)
 	fprintf(fp, "%c", (G[y*ARR+x] == -1 ? '.' : G[y*ARR+x]+48));
       fprintf(fp, "\n");
     }
-}
-
-// outputs grid to file for gnuplotting
-void OutputGridGraphics(int *G, int ARR)
-{
-  int x, y;
-  FILE *fp;
-
-  fp = fopen("poly.pic", "w");
-
-  for(y = 0; y < ARR; y++)
-    {
-      for(x = 0; x < ARR; x++)
-	{
-	  fprintf(fp, "%i %i %i\n", x, y, (G[y*ARR+x] == -1 ? 0 : G[y*ARR+x]));
-	}
-      fprintf(fp, "\n");
-    }
-  fclose(fp);
 }
 
    
@@ -105,6 +84,7 @@ int Add(int x, int y, int type, int ori, int *Grid, int *sides, int n, int *side
   int data[4];
   int nondet;
 
+  // add this tile to the grid
   Grid[y*ARR+x] = type;
   nondet = 0;
   // this compares our proposed move to all other current possible moves
@@ -265,14 +245,15 @@ int Grow(int *sides, int n, int *Grid, int *size, int allownd, int allowub, int 
   
   max++;
 
+  // allocate memory for structures storing the sides of placed blocks and the neighbour list of possible moves we can make at any given time
   sidelist = (int*)malloc(sizeof(int)*4*n*max*2);
   neighbourlist = (int*)calloc(4*ARR*ARR*n, sizeof(int));
 
   for(i = 0; i < 4*n*max*2; i++)
     sidelist[i] = (i < max ? 0 : -1);
 
-  // horrible looking piece of code to populate
-  // list of sides as described above
+  // horrible looking piece of code to populate list of sides as described above
+  // i.e. the (tile,side) coordinates for every instance of colour 1, colour 2, ...
   for(i = 0; i < n; i++)
     {
       for(j = 0; j < 4; j++)
@@ -293,12 +274,9 @@ int Grow(int *sides, int n, int *Grid, int *size, int allownd, int allowub, int 
 	}
     }
 
+  // simulate as many assembly runs as we are using to check determinism
   for(run = 0; run <= checksize; run++)
     {
-      // this should now be redundant as we're tracking the number of elements in the list
-      //      for(i = 0; i < 4*ARR*ARR*n; i++)
-      //	neighbourlist[i] = 0;
-
       // initialise assembly grid with empty space 
       for(i = 0; i < ARR*ARR; i++)
 	Grid[i] = -1;
@@ -320,6 +298,7 @@ int Grow(int *sides, int n, int *Grid, int *size, int allownd, int allowub, int 
 	(*size)++;
       }
 
+      // catch nondeterminism
       if(checksize && run > 0 && *size != last)
 	{free(sidelist); free(neighbourlist); return -3;}
 
