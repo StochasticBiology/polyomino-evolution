@@ -18,10 +18,7 @@ experiments = c("stats-out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08.csv",
 		"stats-out-blend-1-0.100-10-16-16-64-0-2-1-5000-1e+08.csv",
                 "stats-out-blend-0-0.100-10-16-16-64-1-2-1-5000-1e+08.csv",
 		"stats-out-blend-1-0.100-10-16-16-64-0-3-1-5000-1e+08.csv",
-                "stats-out-blend-0-0.100-10-16-16-64-1-3-1-5000-1e+08.csv",
-		"stats-out-blend-1-0.100-10-16-16-64-0-0-1-0-1e+07.csv",
-		"stats-out-blend-1-0.100-10-16-16-64-0-0-1-0-1e+08.csv",
-		"stats-out-blend-1-0.100-10-16-16-64-0-0-1-0-1e+09.csv")
+                "stats-out-blend-0-0.100-10-16-16-64-1-3-1-5000-1e+08.csv")
 
 titles = c("Default: F=16, targets only, mu = 0.1",
            "all structures",
@@ -35,10 +32,7 @@ titles = c("Default: F=16, targets only, mu = 0.1",
 	   "confound 2",
 	   "undirected, confound 2, all structures",
 	   "confound 3",
-	   "undirected, confound 3, all structures",
-	   "sampling only, 1e7",
-	   "sampling only, 1e8",
-	   "sampling only, 1e9")
+	   "undirected, confound 3, all structures")
 
 plots = list()
 for(i in 1:length(experiments)) {
@@ -50,8 +44,24 @@ for(i in 1:length(experiments)) {
       
 }
 
+png("plot-blend-0.png", width=800, height=800)
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], plots[[8]], plots[[9]], plots[[10]], plots[[11]], plots[[12]], plots[[13]], nrow=4)
+dev.off()
+
+### sampling effects
+
+experiments = c("stats-out-blend-1-0.100-10-16-16-64-0-0-1-0-1e+07.csv",
+		"stats-out-blend-1-0.100-10-16-16-64-0-0-1-0-1e+08.csv",
+		"stats-out-blend-1-0.100-10-16-16-64-0-0-1-0-1e+09.csv")
+plot.df = data.frame(Complexity = NULL, Frequency = NULL, Samples = NULL)
+sample.labels = c("1e7", "1e8", "1e9")
+for(i in 1:length(experiments)) {
+  df = read.csv(experiments[i], header=T)
+  plot.df = rbind(plot.df, data.frame(Complexity = df$CMNInterface, Frequency = df$SampleCount, Samples = sample.labels[i]))
+}
+
 png("plot-blend-1.png", width=800, height=800)
-grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], plots[[8]], plots[[9]], plots[[10]], plots[[11]], plots[[12]], plots[[13]], plots[[14]], plots[[15]], plots[[16]], nrow=4)
+ggplot(plot.df, aes(x=Complexity, y=log(Frequency), colour=Samples)) + geom_point()
 dev.off()
 
 ### symmetry
@@ -61,14 +71,16 @@ experiments = c("stats-out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08.csv")
 df = read.csv(experiments[1])
 symmgroups = c("D4", "C4", "D2", "C2", "D1", "C1")
 df$SymmGroup = symmgroups[df$Symmetry+1]
-symm.df = data.frame(SymmGroup = symmgroups, Count=0)
+symm.df = data.frame(SymmGroup = rep(symmgroups, 2), Class=c(rep("Evolved", length(symmgroups)), rep("Structures", length(symmgroups))), Count=0)
 for(i in 1:nrow(df)) {
-  ref = which(symm.df$SymmGroup == df$SymmGroup[i])
-  symm.df$Count[ref] = symm.df$Count[ref] + df$DiscoveryCount[i]
+  ref = which(symm.df$SymmGroup == df$SymmGroup[i] & symm.df$Class == "Evolved")
+  symm.df$Count[ref] = symm.df$Count[ref] + df$AdaptCount[i]/sum(df$AdaptCount)
+  ref = which(symm.df$SymmGroup == df$SymmGroup[i] & symm.df$Class == "Structures")
+  symm.df$Count[ref] = symm.df$Count[ref] + 1/nrow(df)
 }
 
 png("plot-blend-2.png", width=800, height=800)
-ggplot(symm.df, aes(x=SymmGroup, y=Count)) + geom_col()
+ggplot(symm.df, aes(x=factor(SymmGroup, levels=symmgroups), y=log(Count), colour=Class)) + geom_point()
 dev.off()
 
 ### complexity dynamics
@@ -80,6 +92,7 @@ plots = list()
 for(expt in 1:2) {
   df = read.csv(experiments[expt], header=T)
   pop.df = read.csv(gsub("stats", "pop", experiments[expt]), header=F)
+  pop.df = pop.df[pop.df$V1 < 10,]
   complexity.df = pop.df
   for(i in 3:ncol(complexity.df)) {
     complexity.df[,i] = unlist(lapply(pop.df[,i], function(x) ifelse(x == -1, 0, df$CMNInterface[x+1])))
@@ -129,6 +142,7 @@ plots = list()
 expt = 1
 df = read.csv(experiments[expt], header=T)
 pop.df = read.csv(gsub("stats", "pop", experiments[expt]), header=F)
+pop.df = pop.df[pop.df$V1 < 10,]
 fitness.df = pop.df
 for(i in 3:ncol(fitness.df)) {
   fitness.df[,i] = unlist(lapply(pop.df[,i], function(x) ifelse(x == -1, 0, 1/(abs(df$Size[x+1]-16)+1) ) ))
@@ -230,6 +244,8 @@ dev.off()
 experiments = c("stats-out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08.csv",
 		"stats-out-blend-1-0.100-10-16-16-64-0-0-1-0-1e+08.csv")
 
+symmgroups = c("D4", "C4", "D2", "C2", "D1", "C1")
+
 directed.df = read.csv(experiments[1], header=T)
 sampling.df = read.csv(experiments[2], header=T)
 
@@ -251,7 +267,7 @@ for(i in 1:nrow(directed.df)) {
 symm.df$Count[symm.df$Class == "Directed"] = symm.df$Count[symm.df$Class == "Directed"] / sum(symm.df$Count[symm.df$Class == "Directed"])
 symm.df$Count[symm.df$Class == "Sampled"] = symm.df$Count[symm.df$Class == "Sampled"] / sum(symm.df$Count[symm.df$Class == "Sampled"])
 
-symm.plot = ggplot(symm.df ,aes(x=SymmGroup, y=Count, fill=Class)) + geom_col(position="dodge")
+symm.plot = ggplot(symm.df ,aes(x=factor(SymmGroup, levels=symmgroups), y=log(Count), colour=Class)) + geom_point()
 
 max.mod = max(max(sampling.df$Modularity), max(directed.df$Modularity))
 mod.df = data.frame(Mod = seq(from=1,to=max.mod), Class = c(rep("Directed", max.mod), rep("Sampled", max.mod)), Count=0)
@@ -276,11 +292,11 @@ for(i in 1:nrow(sampling.df)) {
 #for(i in 1:nrow(directed.df)) {
 #  mod.stats.df = rbind(mod.stats.df, data.frame(Mod = directed.df$Modularity[i], Class = "Directed", Complexity = directed.df$CMNInterface[i], SymmGroup = symmgroups[directed.df$Symmetry[i]+1]))
 #}
-mod.df$Mod = 1/mod.df$Mod
+mod.stats.df$Mod = 1/mod.stats.df$Mod
 
-mod.dist = ggplot(mod.stats.df, aes(x=factor(Mod), y = Complexity, fill=Class)) + geom_boxplot()
+mod.dist = ggplot(mod.stats.df, aes(x=factor(log(Mod)), y = Complexity, colour=Class)) + geom_boxplot() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
-symm.dist = ggplot(mod.stats.df, aes(x=factor(SymmGroup, levels=c("D4", "C4", "D2", "C2", "D1", "C1")), y = Complexity, fill=Class)) + geom_boxplot()
+symm.dist = ggplot(mod.stats.df, aes(x=factor(SymmGroup, levels=symmgroups), y = Complexity, fill=Class)) + geom_boxplot()
 
 png("plot-blend-7.png", width=800, height=800)
 grid.arrange(symm.plot, mod.plot, mod.dist, symm.dist, nrow=4)
