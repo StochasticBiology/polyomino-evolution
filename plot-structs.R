@@ -58,7 +58,8 @@ p.text.df = text.df[ranking[text.df$Structure] <= n.plot,]
 
 outfile = paste(c("structs-", args[1], ".png"), collapse="")
 
-png(outfile, width=800, height=800)
+res.factor = 3
+png(outfile, width=800*res.factor, height=800*res.factor, res=72*res.factor)
 ggplot() +
   geom_tile(data = p.struct.df,
     aes(x=x+space*xoffset(ranking[Structure])+shadow, y=y-space*yoffset(ranking[Structure])-shadow), fill="#AAAAAA") +
