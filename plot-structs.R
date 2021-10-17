@@ -6,6 +6,7 @@ if(length(args) < 1) {
 }
 
 #args = c("out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08")
+args = c("out-blend-1-0.100-10-8-16-64-0-0-1-5000-1e+08")
 
 library(ggplot2)
 
@@ -21,6 +22,7 @@ t = scan(infile, what="character", sep="\n")
 struct.df = data.frame(Structure=NULL,x=NULL,y=NULL)
 this.struct = 0
 this.y = 1
+if(length(t) < max.t) { max.t = length(t) }
 for(i in 1:max.t) {
   if(!grepl("Library", t[i])) {
     positives = setdiff(seq(1:ARR), gregexpr("[.]", t[i])[[1]])
