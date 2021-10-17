@@ -28,3 +28,9 @@ gcc -o3 sim-poly-blend.c -lm -o sim-poly-blend.ce -g
 ./sim-poly-blend.ce --numr 0 --ntile 2 --ncol 8 --nbitcol 3 > tmp24 &
 ./sim-poly-blend.ce --numr 0 --ntile 4 --ncol 16 --nbitcol 4 > tmp25 &
 ./sim-poly-blend.ce --numr 0 --ntile 8 --ncol 32 --nbitcol 5 > tmp26 &
+
+./sim-poly-blend.ce --targetsize 32 --numr 10 --outputall 1 > tmp27 &
+./sim-poly-blend.ce --targetsize 35 --numr 10 --outputall 1 > tmp28 &
+./sim-poly-blend.ce --targetsize 40 --numr 10 --outputall 1 > tmp29 &
+
+Rscript plot-structs.R out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08
