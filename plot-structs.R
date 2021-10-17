@@ -6,7 +6,6 @@ if(length(args) < 1) {
 }
 
 #args = c("out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08")
-args = c("out-blend-1-0.100-10-8-16-64-0-0-1-5000-1e+08")
 
 library(ggplot2)
 

@@ -34,3 +34,5 @@ gcc -o3 sim-poly-blend.c -lm -o sim-poly-blend.ce -g
 ./sim-poly-blend.ce --targetsize 40 --numr 10 --outputall 1 > tmp29 &
 
 Rscript plot-structs.R out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08
+Rscript plot-structs.R out-blend-1-0.100-10-8-16-64-0-0-1-5000-1e+08
+Rscript plot-structs.R out-blend-1-0.100-10-15-16-64-0-0-1-5000-1e+08
