@@ -1,6 +1,8 @@
 # polyomino-evolution
 Simulation of evolution and complexity in polymino assembly model
 
+Requirements: C, R with `ggplot2` 
+
 `sim-poly-blend.c` is the workhorse code. It takes command-line arguments (with defaults):
 * `--directed 1` (directed evolution? 0 no, 1 size-based fitness, -1 random fitness)
 * `--npar 10` (number of individuals in evolutionary population)
@@ -15,5 +17,7 @@ Simulation of evolution and complexity in polymino assembly model
 * `--rseed 1` (random seed)
 
 `plot-blend.R` plots various summaries of the outputs
+
+`plot-structs.R` , passed a command-line reference to a particular experiment, draws the top polyomino structures from that experiment
 
 `run-blend.sh` compiles and runs a set of experiments in Bash
