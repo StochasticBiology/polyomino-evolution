@@ -48,6 +48,40 @@ png("plot-blend-0.png", width=800, height=800)
 grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], plots[[8]], plots[[9]], plots[[10]], plots[[11]], plots[[12]], plots[[13]], nrow=4)
 dev.off()
 
+### complexity histograms for many different cases
+
+experiments = c("stats-out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08.csv",
+		"stats-out-blend-0-0.100-10-16-16-64-1-0-1-5000-1e+08.csv",
+		"stats-out-blend-1-0.100-10-16-16-64-0-1-1-5000-1e+08.csv",
+                "stats-out-blend-0-0.100-10-16-16-64-1-1-1-5000-1e+08.csv",
+		"stats-out-blend-1-0.100-10-16-16-64-0-2-1-5000-1e+08.csv",
+                "stats-out-blend-0-0.100-10-16-16-64-1-2-1-5000-1e+08.csv",
+		"stats-out-blend-1-0.100-10-16-16-64-0-3-1-5000-1e+08.csv",
+                "stats-out-blend-0-0.100-10-16-16-64-1-3-1-5000-1e+08.csv")
+
+titles = c("Default: F=16, targets only, mu = 0.1",
+	   "undirected, all structures",
+	   "confound 1",
+	   "undirected, confound 1, all structures",
+	   "confound 2",
+	   "undirected, confound 2, all structures",
+	   "confound 3",
+	   "undirected, confound 3, all structures")
+
+plots = list()
+for(i in 1:length(experiments)) {
+  df = read.csv(experiments[i], header=T)
+  plots[[length(plots)+1]] = ggplot(df, aes(x=CMNInterface, y=log(DiscoveryCount))) +
+      geom_jitter(width=0.1, height = 0.01) +
+      labs(title = titles[i]) +
+      theme(legend.position = "none") 
+      
+}
+
+png("plot-blend-0b.png", width=800, height=800)
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], plots[[7]], plots[[8]], nrow=4)
+dev.off()
+
 ### sampling effects
 
 experiments = c("stats-out-blend-1-0.100-10-16-16-64-0-0-1-0-1e+07.csv",
@@ -66,10 +100,13 @@ dev.off()
 
 ### symmetry
 
-experiments = c("stats-out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08.csv")
+experiments = c("stats-out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08.csv",
+                "stats-out-blend-0-0.100-10-16-16-64-1-0-1-5000-1e+08.csv",
+		"stats-out-blend-1-0.100-10-16-16-64-0-0-1-5000-1e+08.csv")
+
+symmgroups = c("D4", "C4", "D2", "C2", "D1", "C1")
 
 df = read.csv(experiments[1])
-symmgroups = c("D4", "C4", "D2", "C2", "D1", "C1")
 df$SymmGroup = symmgroups[df$Symmetry+1]
 symm.df = data.frame(SymmGroup = rep(symmgroups, 2), Class=c(rep("Evolved", length(symmgroups)), rep("Structures", length(symmgroups))), Count=0)
 for(i in 1:nrow(df)) {
@@ -79,8 +116,44 @@ for(i in 1:nrow(df)) {
   symm.df$Count[ref] = symm.df$Count[ref] + 1/nrow(df)
 }
 
+symm2.df = data.frame(SymmGroup = rep(symmgroups, 2), Class=c(rep("Sampled 16-mers", length(symmgroups)), rep("Sampled under 16", length(symmgroups)), rep("Directed 16-mers", length(symmgroups)), rep("Undirected all", length(symmgroups))), Count=0)
+df = read.csv(experiments[2])
+df$SymmGroup = symmgroups[df$Symmetry+1]
+for(i in 1:nrow(df)) {
+  if(df$Size[i] == 16) {
+    ref = which(symm2.df$SymmGroup == df$SymmGroup[i] & symm2.df$Class == "Sampled 16-mers")
+    symm2.df$Count[ref] = symm2.df$Count[ref] + 1/nrow(df)
+  }
+  if(df$Size[i] < 16) {
+    ref = which(symm2.df$SymmGroup == df$SymmGroup[i] & symm2.df$Class == "Sampled under 16")
+    symm2.df$Count[ref] = symm2.df$Count[ref] + 1/nrow(df)
+  }
+  ref = which(symm2.df$SymmGroup == df$SymmGroup[i] & symm2.df$Class == "Undirected all")
+  symm2.df$Count[ref] = symm2.df$Count[ref] + df$DiscoveryCount[i]/sum(df$DiscoveryCount)
+}
+df = read.csv(experiments[3])
+df$SymmGroup = symmgroups[df$Symmetry+1]
+for(i in 1:nrow(df)) {
+    ref = which(symm2.df$SymmGroup == df$SymmGroup[i] & symm2.df$Class == "Directed 16-mers")
+    symm2.df$Count[ref] = symm2.df$Count[ref] + df$DiscoveryCount[i]/sum(df$DiscoveryCount)
+}
+
+symm.baseline = floor(min(log(symm.df$Count)))
+symm.df$transLogCount = log(symm.df$Count)-symm.baseline
+symm.plot.1 = ggplot(symm.df, aes(x=factor(SymmGroup, levels=symmgroups), y=transLogCount, fill=Class, colour=Class)) +
+  geom_col(position="dodge") +
+  scale_y_continuous(labels = function(y) y + symm.baseline)
+
+symm2.baseline = floor(min(log(symm2.df$Count[symm2.df$Count != 0])))
+symm2.df$transLogCount = log(symm2.df$Count)-symm2.baseline
+symm.plot.2 = ggplot(symm2.df, aes(x=factor(SymmGroup, levels=symmgroups), y=transLogCount, fill=factor(Class, levels = c("Sampled 16-mers", "Sampled under 16", "Directed 16-mers", "Undirected all")))) +
+  geom_col(position="dodge") +
+  scale_y_continuous(labels = function(y) y + symm2.baseline) +
+  labs(fill = "Class")
+
+
 png("plot-blend-2.png", width=800, height=800)
-ggplot(symm.df, aes(x=factor(SymmGroup, levels=symmgroups), y=log(Count), colour=Class)) + geom_point()
+grid.arrange(symm.plot.1, symm.plot.2, nrow=2)
 dev.off()
 
 ### complexity dynamics
@@ -92,7 +165,7 @@ plots = list()
 for(expt in 1:2) {
   df = read.csv(experiments[expt], header=T)
   pop.df = read.csv(gsub("stats", "pop", experiments[expt]), header=F)
-  pop.df = pop.df[pop.df$V1 < 10,]
+  pop.df = pop.df[pop.df$V1 < 100,]
   complexity.df = pop.df
   for(i in 3:ncol(complexity.df)) {
     complexity.df[,i] = unlist(lapply(pop.df[,i], function(x) ifelse(x == -1, 0, df$CMNInterface[x+1])))
@@ -313,4 +386,56 @@ colnames(to.plot) = gsub("CM", "", colnames(to.plot))
 
 png("plot-blend-8.png", width=800, height=800)
 ggpairs(to.plot, lower = list(continuous = "cor", combo = "box_no_facet", discrete = "count", na = "na"), upper = list(continuous = "points", combo = "facethist", discrete = "facetbar", na = "na"))
+dev.off()
+
+### complexity dynamics for bigger structures
+
+experiments = c("stats-out-blend-1-0.100-10-32-16-64-1-0-1-10-1e+08.csv",
+                "stats-out-blend-1-0.100-10-35-16-64-1-0-1-10-1e+08.csv",
+                "stats-out-blend-1-0.100-10-40-16-64-1-0-1-10-1e+08.csv")
+		
+plots = list()
+for(expt in 1:3) {
+  df = read.csv(experiments[expt], header=T)
+  pop.df = read.csv(gsub("stats", "pop", experiments[expt]), header=F)
+  pop.df = pop.df[pop.df$V1 < 100,]
+  complexity.df = pop.df
+  for(i in 3:ncol(complexity.df)) {
+    complexity.df[,i] = unlist(lapply(pop.df[,i], function(x) ifelse(x == -1, 0, df$CMNInterface[x+1])))
+  }
+  complexity.stats.df = data.frame(Run=complexity.df$V1, Time=complexity.df$V2, Min=0, Mean=0, Max=0, HistMax=0)
+  tmp.hist.max = 0
+  for(i in 1:nrow(complexity.df)) {
+    if(i > 1) {
+      if(complexity.stats.df$Run[i] != complexity.stats.df$Run[i-1]) {
+        tmp.hist.max = 0
+      }
+    }
+    complexity.stats.df$Min[i] = min(as.numeric(complexity.df[i,3:ncol(complexity.df)]))
+    tmp.max = max(as.numeric(complexity.df[i,3:ncol(complexity.df)]))
+    complexity.stats.df$Max[i] = tmp.max
+    if(tmp.max > tmp.hist.max) {
+      tmp.hist.max = tmp.max
+    }
+    complexity.stats.df$HistMax[i] = tmp.hist.max
+    complexity.stats.df$Mean[i] = mean(as.numeric(complexity.df[i,3:ncol(complexity.df)]))
+  }
+
+  expt.title = switch(expt == 1, "s* = 32", "s* = 35", "s* = 40")
+  plots[[length(plots)+1]] = ggplot(complexity.stats.df, aes(x=Time, y=Mean, col=factor(Run))) +
+    geom_line() +
+    labs(title = paste(c(expt.title, "Mean"))) +
+    theme(legend.position = "none") 
+  plots[[length(plots)+1]] = ggplot(complexity.stats.df, aes(x=Time, y=Max, col=factor(Run))) +
+    geom_line() +
+    labs(title = paste(c(expt.title, "Max"))) +
+    theme(legend.position = "none") 
+  plots[[length(plots)+1]] = ggplot(complexity.stats.df, aes(x=Time, y=HistMax, col=factor(Run))) +
+    geom_line() +
+    labs(title = paste(c(expt.title, "Historical Max"))) +
+    theme(legend.position = "none") 
+}
+
+png("plot-blend-9.png", width=800, height=800)
+grid.arrange(plots[[1]], plots[[2]], plots[[3]], plots[[4]], plots[[5]], plots[[6]], nrow=2)
 dev.off()
