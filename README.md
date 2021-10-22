@@ -3,7 +3,9 @@ Simulation of evolution and complexity in polymino assembly model
 
 Requirements: C, R with `ggplot2` , Bash for the wrapper script
 
-`sim-poly-blend.c` is the workhorse code. It takes command-line arguments (with defaults):
+`run-blend.sh` is wrapper code, which compiles and runs a set of experiments in Bash
+
+`sim-poly-blend.c` wraps an individual experiment. It takes command-line arguments (with defaults):
 * `--directed 1` (directed evolution? 0 no, 1 size-based fitness, -1 random fitness)
 * `--npar 10` (number of individuals in evolutionary population)
 * `--mut 0.1000` (mutation rate per genome bit)
@@ -22,8 +24,15 @@ The outputs, depending on the experiment, are files labelled as follows:
 * `lib-` -- shapes of recorded structures, as ASCII characters on a square grid (`.` denotes an empty site)
 * `pop-` -- population structure over time and simulation instances, with references referring to the structures in `stats-` and `lib-` (`-1` denotes an unbound or non-deterministic individual)
 
-`plot-blend.R` plots various summaries of the outputs
+The other `.c` files take care of things under the hood:
+* `assembly.c` -- polyomino assembly
+* `ga.c` -- genetic algorithm
+* `library.c` -- structure comparison and storage
+* `stats-variable.c` -- various summary and complexity statistics for polyomino structures
 
-`plot-structs.R` , passed a command-line reference to a particular experiment, draws the top polyomino structures from that experiment
+Visualisation is done in R:
+* `plot-blend.R` plots various summaries of the outputs, corresponding roughly to manuscript figures
+* `plot-structs.R` , passed a command-line reference to a particular experiment, draws the top polyomino structures from that experiment
+* `plot-complexity-hists.R` plots complexity histograms over (simulation) time
 
-`run-blend.sh` compiles and runs a set of experiments in Bash
+
