@@ -34,5 +34,5 @@ Visualisation is done in R:
 * `plot-blend.R` plots various summaries of the outputs, corresponding roughly to manuscript figures
 * `plot-structs.R` , passed a command-line reference to a particular experiment, draws the top polyomino structures from that experiment
 * `plot-complexity-hists.R` plots complexity histograms over (simulation) time
-
+* (files with prepended `nz-` produce these plots using the `nnonzero` (number of nonzero genome sites) complexity measure instead of the `ninterface` (number of interface types)
 
