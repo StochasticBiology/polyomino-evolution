@@ -27,22 +27,23 @@ for(expt in 1:3) {
 
 if(expt == 3) {
     par(mfrow=c(1,2))
-    hist(df$CMNNonzero, xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab = "Frequency", main="All structures", freq=hist.freq)
-    hist(df$CMNNonzero[df$Size == 16], xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab = "Frequency", main="All 16-mers", freq=hist.freq)
+    hist(df$CMNNonzero, xlim=c(0,maxc), xlab="~                                          \nK (number of interface types)", ylab = "Frequency", main="All structures", breaks=0:45, freq=hist.freq)
+    hist(df$CMNNonzero[df$Size == 16], xlim=c(0,maxc), xlab="~                                          \nK (number of interface types)", ylab = "Frequency", main="All 16-mers", breaks=0:45, freq=hist.freq)
+    dev.off()
   }
   else {
     par(mfrow=c(4,4))
     
-    hist(df$CMNNonzero[df$MinDiscoveryTime < t1], xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab="Frequency", main="Without occurrence counts:\nAll structures\ndiscovered t<t1", freq=hist.freq)
-    hist(df$CMNNonzero[df$MinDiscoveryTime < t2], xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab="Frequency", main="All structures\ndiscovered t<t2", freq=hist.freq)
-    hist(df$CMNNonzero[df$MinDiscoveryTime < t3], xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab="Frequency", main="All structures\ndiscovered t<t3", freq=hist.freq)
-    hist(df$CMNNonzero, xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab="Frequency", main="All structures")
+    hist(df$CMNNonzero[df$MinDiscoveryTime < t1], xlim=c(0,maxc), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="Without occurrence counts:\nAll structures\ndiscovered t<t1", breaks=0:45, freq=hist.freq)
+    hist(df$CMNNonzero[df$MinDiscoveryTime < t2], xlim=c(0,maxc), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="All structures\ndiscovered t<t2", breaks=0:45, freq=hist.freq)
+    hist(df$CMNNonzero[df$MinDiscoveryTime < t3], xlim=c(0,maxc), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="All structures\ndiscovered t<t3", breaks=0:45, freq=hist.freq)
+    hist(df$CMNNonzero, xlim=c(0,maxc), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="All structures", breaks=0:45, freq=hist.freq)
     
     if(length(df$CMNNonzero[df$Size == 16 & df$MinDiscoveryTime < t1]) == 0) { plot(0,type='n',axes=FALSE,ann=FALSE) }
-    else { hist(df$CMNNonzero[df$Size == 16 & df$MinDiscoveryTime < t1], xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t1", freq=hist.freq) }
-    hist(df$CMNNonzero[df$Size == 16 & df$MinDiscoveryTime < t2], xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t2", freq=hist.freq)
-    hist(df$CMNNonzero[df$Size == 16 & df$MinDiscoveryTime < t3], xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t3", freq=hist.freq)
-    hist(df$CMNNonzero[df$Size == 16], xlim=c(0,maxc), xlab="K̃ (number of interface types)", ylab="Frequency", main="All 16-mers", freq=hist.freq)
+    else { hist(df$CMNNonzero[df$Size == 16 & df$MinDiscoveryTime < t1], xlim=c(0,maxc), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t1", breaks=0:45, freq=hist.freq) }
+    hist(df$CMNNonzero[df$Size == 16 & df$MinDiscoveryTime < t2], xlim=c(0,maxc), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t2", breaks=0:45, freq=hist.freq)
+    hist(df$CMNNonzero[df$Size == 16 & df$MinDiscoveryTime < t3], xlim=c(0,maxc), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t3", breaks=0:45, freq=hist.freq)
+    hist(df$CMNNonzero[df$Size == 16], xlim=c(0,maxc), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="All 16-mers", breaks=0:45, freq=hist.freq)
     
     new.df = data.frame(Complexity=NULL, Time=NULL, Count=NULL)
     for(i in seq(from=0,to=maxc)) {
@@ -66,15 +67,15 @@ if(expt == 3) {
       }
     }
     
-    plot(new.df$Complexity[new.df$Time == t1], new.df$Count[new.df$Time == t1]/ifelse(trace.norm, sum(new.df$Count[new.df$Time == t1]), 1), xlab="K̃ (number of interface types)", ylab="Frequency", main="With occurrence counts:\nAll structures\ndiscovered t<t1", type="b")
-    plot(new.df$Complexity[new.df$Time == t2], new.df$Count[new.df$Time == t2]/ifelse(trace.norm, sum(new.df$Count[new.df$Time == t2]), 1), xlab="K̃ (number of interface types)", ylab="Frequency", main="All structures\ndiscovered t<t2", type="b")
-    plot(new.df$Complexity[new.df$Time == t3], new.df$Count[new.df$Time == t3]/ifelse(trace.norm, sum(new.df$Count[new.df$Time == t3]), 1), xlab="K̃ (number of interface types)", ylab="Frequency", main="All structures\ndiscovered t<t3", type="b")
-    plot(new.df$Complexity[new.df$Time == 20000], new.df$Count[new.df$Time == 20000]/ifelse(trace.norm, sum(new.df$Count[new.df$Time == 20000]), 1), xlab="K̃ (number of interface types)", ylab="Frequency", main="All structures", type="b")
+    plot(new.df$Complexity[new.df$Time == t1], new.df$Count[new.df$Time == t1]/ifelse(trace.norm, sum(new.df$Count[new.df$Time == t1]), 1), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="With occurrence counts:\nAll structures\ndiscovered t<t1", type="b")
+    plot(new.df$Complexity[new.df$Time == t2], new.df$Count[new.df$Time == t2]/ifelse(trace.norm, sum(new.df$Count[new.df$Time == t2]), 1), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="All structures\ndiscovered t<t2", type="b")
+    plot(new.df$Complexity[new.df$Time == t3], new.df$Count[new.df$Time == t3]/ifelse(trace.norm, sum(new.df$Count[new.df$Time == t3]), 1), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="All structures\ndiscovered t<t3", type="b")
+    plot(new.df$Complexity[new.df$Time == 20000], new.df$Count[new.df$Time == 20000]/ifelse(trace.norm, sum(new.df$Count[new.df$Time == 20000]), 1), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="All structures", type="b")
     
-    plot(new.16.df$Complexity[new.16.df$Time == t1], new.16.df$Count[new.16.df$Time == t1]/ifelse(trace.norm, sum(new.16.df$Count[new.16.df$Time == t1]), 1), xlab="K̃ (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t1", type="b")
-    plot(new.16.df$Complexity[new.16.df$Time == t2], new.16.df$Count[new.16.df$Time == t2]/ifelse(trace.norm, sum(new.16.df$Count[new.16.df$Time == t2]), 1), xlab="K̃ (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t2", type="b")
-    plot(new.16.df$Complexity[new.16.df$Time == t3], new.16.df$Count[new.16.df$Time == t3]/ifelse(trace.norm, sum(new.16.df$Count[new.16.df$Time == t3]), 1), xlab="K̃ (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t3", type="b")
-    plot(new.16.df$Complexity[new.16.df$Time == 20000], new.16.df$Count[new.16.df$Time == 20000]/ifelse(trace.norm, sum(new.16.df$Count[new.16.df$Time == 20000]), 1), xlab="K̃ (number of interface types)", ylab="Frequency", main="All 16-mers", type="b")
+    plot(new.16.df$Complexity[new.16.df$Time == t1], new.16.df$Count[new.16.df$Time == t1]/ifelse(trace.norm, sum(new.16.df$Count[new.16.df$Time == t1]), 1), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t1", type="b")
+    plot(new.16.df$Complexity[new.16.df$Time == t2], new.16.df$Count[new.16.df$Time == t2]/ifelse(trace.norm, sum(new.16.df$Count[new.16.df$Time == t2]), 1), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t2", type="b")
+    plot(new.16.df$Complexity[new.16.df$Time == t3], new.16.df$Count[new.16.df$Time == t3]/ifelse(trace.norm, sum(new.16.df$Count[new.16.df$Time == t3]), 1), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="16-mers\ndiscovered t<t3", type="b")
+    plot(new.16.df$Complexity[new.16.df$Time == 20000], new.16.df$Count[new.16.df$Time == 20000]/ifelse(trace.norm, sum(new.16.df$Count[new.16.df$Time == 20000]), 1), xlab="~                                                \nK (number of interface types)", ylab="Frequency", main="All 16-mers", type="b")
     
     dev.off()
   }
