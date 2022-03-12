@@ -1,5 +1,5 @@
 # polyomino-evolution
-Simulation of evolution and complexity in polymino assembly model
+Simulation of evolution and complexity in polymino assembly model -- as in Johnston et al. "Symmetry and simplicity spontaneously emerge from the algorithmic nature of evolution" Proc Natl Acad Sci USA 119 (11) e2113883119 (2022) here https://www.pnas.org/doi/10.1073/pnas.2113883119
 
 Requirements: C, R with `ggplot2` , Bash for the wrapper script
 
